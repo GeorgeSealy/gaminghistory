@@ -9,6 +9,7 @@ router.get('/', (req, res) => {
  	// res.send(req.query.name);
  	// res.json(req.query);
  	res.render('hello', {
+ 		title: 'test',
  		name: 'George',
  		dog: req.query.dog
 

@@ -17,8 +17,8 @@ exports.homePage = (req, res) => {
  	console.log(req.body);
 
 
- 	const store = new Store(req.body);
- 	await store.save();
+ 	const store = await (new Store(req.body)).save();
 
- 	res.redirect('/');
+ 	req.flash('success', `Successfully created ${store.name}. Care to leave a review?`)
+ 	res.redirect(`/store/${store.slug}`);
  };

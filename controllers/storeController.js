@@ -1,3 +1,6 @@
+const mongoose = require('mongoose');
+const Store = mongoose.model('Store');
+
 exports.homePage = (req, res) => {
 	console.log(req.name);
  	res.render('index');
@@ -9,7 +12,13 @@ exports.homePage = (req, res) => {
  	});
  };
 
- exports.createStore = (req, res) => {
+ exports.createStore = async (req, res) => {
+ 	console.log('Creating store...')
  	console.log(req.body);
- 	res.json(req.body);
+
+
+ 	const store = new Store(req.body);
+ 	await store.save();
+
+ 	res.redirect('/');
  };

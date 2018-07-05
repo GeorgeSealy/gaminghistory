@@ -40,6 +40,14 @@ const storeSchema = new mongoose.Schema({
 	}
 });
 
+// Define our indexes
+
+// Note: this is a compund index (not two separate ones)
+storeSchema.index({
+	name: 'text',
+	description: 'text'
+})
+
 storeSchema.pre('save', async function(next) {
 
 	if (!this.isModified('name')) {

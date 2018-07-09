@@ -154,6 +154,10 @@ var _map = __webpack_require__(33);
 
 var _map2 = _interopRequireDefault(_map);
 
+var _heart = __webpack_require__(34);
+
+var _heart2 = _interopRequireDefault(_heart);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _autoComplete2.default)((0, _bling.$)('#address'), (0, _bling.$)('#lat'), (0, _bling.$)('#lng'));
@@ -161,6 +165,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 (0, _typeAhead2.default)((0, _bling.$)('.search'));
 
 (0, _map2.default)((0, _bling.$)('#map'));
+
+var heartForms = (0, _bling.$$)('form.heart');
+heartForms.on('submit', _heart2.default);
 
 /***/ }),
 /* 4 */,
@@ -2788,7 +2795,7 @@ function loadPlaces(map) {
 		// zoom the map to fit
 		map.setCenter(bounds.getCenter());
 		map.fitBounds(bounds);
-	});
+	}).catch(console.error);
 }
 
 function makeMap(mapDiv) {
@@ -2814,6 +2821,47 @@ function makeMap(mapDiv) {
 }
 
 exports.default = makeMap;
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _axios = __webpack_require__(14);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+var _bling = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function ajaxHeart(e) {
+	var _this = this;
+
+	e.preventDefault();
+	console.log('HEART');
+
+	_axios2.default.post(this.action).then(function (res) {
+		var isHearted = _this.heart.classList.toggle('heart__button--hearted');
+		(0, _bling.$)('.heart-count').textContent = res.data.hearts.length;
+
+		// Firefox bug makes this animation not work / look correct
+		if (isHearted) {
+			_this.heart.classList.add('heart__button--float');
+			setTimeout(function () {
+				return _this.heart.classList.remove('heart__button--float');
+			}, 2500);
+		}
+	}).catch(console.error);
+}
+
+exports.default = ajaxHeart;
 
 /***/ })
 /******/ ]);

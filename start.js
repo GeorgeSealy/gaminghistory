@@ -20,9 +20,9 @@ mongoose.connection.on('error', (err) => {
 // READY?! Let's go!
 
 // Import all of our models (Ep 09)
-require('./models/Store');
+// require('./models/Store');
 require('./models/User');
-require('./models/Review');
+// require('./models/Review');
 
 // Start our app!
 const app = require('./app');

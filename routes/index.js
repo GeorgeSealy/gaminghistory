@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 // const storeController = require('../controllers/storeController');
 const userController = require('../controllers/userController');
-const authController = require('../controllers/authController');
+// const authController = require('../controllers/authController');
 // const reviewController = require('../controllers/reviewController');
 
 const { catchErrors } = require('../handlers/errorHandlers')
@@ -12,13 +12,25 @@ const { catchErrors } = require('../handlers/errorHandlers')
 */
 
 router.get('/', (req, res) => {
-	res.send('It works still');
+	console.log(`Current user is: ${req.user}`)
+
+	if (req.user) {
+		res.json(req.user);
+	} else {
+		res.send('Not logged in')
+	}
 });
 
 router.post('/api/v1/users', 
 	userController.validateRegister,
-	catchErrors(userController.register)
+	catchErrors(userController.register),
+	catchErrors(userController.login)
 );
+
+router.post('/api/v1/users/login', userController.login);
+router.post('/api/v1/users/logout', userController.logout);
+
+
 	// userController.validateRegister,
 	// catchErrors(userController.register),
 	// function(req, res) {

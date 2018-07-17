@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
 const promisify = require('es6-promisify');
-
+const passport = require('passport');
 
 
 exports.loginForm = (req, res) => {
@@ -51,8 +51,46 @@ exports.register = async (req, res, next) => {
 	const register = promisify(User.register, User);
 
 	await register(user, req.body.password);
-	res.json(user);
-	// next(); // pass to auth controller to login
+	// res.json(user);
+	console.log(`Created: ${user}`);
+	next(); // pass to auth controller to login
+};
+
+exports.login = async (req, res) => {
+	console.log('Trying to authenticate');
+	passport.authenticate('local', function(err, user, info) {
+
+		if (err) { 
+			console.log(err);
+			throw Error('Authentication Error'); 
+			return;
+		}
+
+		if (!user) {
+			console.log('No user');
+			throw Error('No user'); 
+			return;
+		}
+
+		console.log(`Authenticated: ${user}`);
+		req.login(user, function(err) {
+      		if (err) { 
+				console.log(err);
+				throw Error('Authentication Error'); 
+      		}
+
+			console.log(`Current user: ${req.user}`);
+			res.json(req.user);
+    	});
+	})(req, res);
+
+};
+
+exports.logout = (req, res) => {
+	req.logout();
+	// req.flash('success', 'You are now logged out!');
+	console.log(`Current user: ${req.user}`);
+	res.json(req.user);
 };
 
 exports.account = (req, res) => {

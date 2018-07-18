@@ -1,3 +1,4 @@
+const apiResponse = require('../handlers/apiResponse');
 const mongoose = require('mongoose');
 const User = mongoose.model('User');
 const promisify = require('es6-promisify');
@@ -12,85 +13,115 @@ exports.registerForm = (req, res) => {
 	res.render('register', { title: "Register"});
 };
 
-exports.validateRegister = (req, res, next) => {
+// exports.validateRegister = (req, res, next) => {
 
-	console.log(req.body);
+// 	console.log(req.body);
 
-	req.sanitizeBody('name');
-	req.checkBody('name', 'You must supply a name!').notEmpty();
-	req.checkBody('email', 'That email is not valid!').isEmail();
-	req.sanitizeBody('email').normalizeEmail({
-		gmail_remove_dots: false,
-		remove_extension: false,
-		gmail_remove_subaddress: false
-	});
-	req.checkBody('password', 'Password cannot be blank!').notEmpty();
-	req.checkBody('password-confirm', 'Confirmed password cannot be blank!').notEmpty();
-	req.checkBody('password-confirm', 'Oops! Your passwords do not match.').equals(req.body.password);
+// 	req.sanitizeBody('name');
+// 	req.checkBody('name', 'You must supply a name!').notEmpty();
+// 	req.checkBody('email', 'That email is not valid!').isEmail();
+// 	req.sanitizeBody('email').normalizeEmail({
+// 		gmail_remove_dots: false,
+// 		remove_extension: false,
+// 		gmail_remove_subaddress: false
+// 	});
+// 	req.checkBody('password', 'Password cannot be blank!').notEmpty();
+// 	req.checkBody('password-confirm', 'Confirmed password cannot be blank!').notEmpty();
+// 	req.checkBody('password-confirm', 'Oops! Your passwords do not match.').equals(req.body.password);
 
-	const errors = req.validationErrors();
+// 	const errors = req.validationErrors();
 
-	if (errors) {
-		res.send(`Error: ${errors.map(err => err.msg)}`);
-		// req.flash('error', errors.map(err => err.msg));
-		// res.render('register', { title: 'Register', body: req.body, flashes: req.flash() })
-		return;
-	}
+// 	if (errors) {
+// 		res.send(`Error: ${errors.map(err => err.msg)}`);
+// 		// req.flash('error', errors.map(err => err.msg));
+// 		// res.render('register', { title: 'Register', body: req.body, flashes: req.flash() })
+// 		return;
+// 	}
 
-	// No errors
-	console.log(req.body.email);
+// 	// No errors
+// 	console.log(req.body.email);
 
-	// res.send('User validates ok');
-	next();
-};
+// 	// res.send('User validates ok');
+// 	next();
+// };
 
-exports.register = async (req, res, next) => {
-	const user = new User({email: req.body.email, name: req.body.name});
+// exports.register = async (req, res, next) => {
+// 	const user = new User({email: req.body.email, name: req.body.name});
 	
-	// Wrap an older callback based method to act like a modern "promise"
-	const register = promisify(User.register, User);
+// 	// Wrap an older callback based method to act like a modern "promise"
+// 	const register = promisify(User.register, User);
 
-	await register(user, req.body.password);
-	// res.json(user);
-	console.log(`Created: ${user}`);
-	next(); // pass to auth controller to login
-};
+// 	await register(user, req.body.password);
+// 	// res.json(user);
+// 	console.log(`Created: ${user}`);
+// 	next(); // pass to auth controller to login
+// };
 
-exports.login = async (req, res) => {
-	console.log('Trying to authenticate');
-	passport.authenticate('local', function(err, user, info) {
+// exports.login = async (req, res) => {
+// 	console.log('Trying to authenticate');
+// 	passport.authenticate('local', function(err, user, info) {
 
-		if (err) { 
-			console.log(err);
-			throw Error('Authentication Error'); 
-			return;
-		}
+// 		if (err) { 
+// 			console.log(err);
+// 			throw Error('Authentication Error'); 
+// 			return;
+// 		}
 
-		if (!user) {
-			console.log('No user');
-			throw Error('No user'); 
-			return;
-		}
+// 		if (!user) {
+// 			console.log('No user');
+// 			throw Error('No user'); 
+// 			return;
+// 		}
 
-		console.log(`Authenticated: ${user}`);
-		req.login(user, function(err) {
-      		if (err) { 
-				console.log(err);
-				throw Error('Authentication Error'); 
-      		}
+// 		console.log(`Authenticated: ${user}`);
+// 		req.login(user, function(err) {
+//       		if (err) { 
+// 				console.log(err);
+// 				throw Error('Authentication Error'); 
+//       		}
 
-			console.log(`Current user: ${req.user}`);
-			res.json(req.user);
-    	});
-	})(req, res);
+// 			console.log(`Current user: ${req.user}`);
+// 			res.json(req.user);
+//     	});
+// 	})(req, res);
 
-};
+// };
 
-exports.logout = (req, res) => {
-	req.logout();
-	// req.flash('success', 'You are now logged out!');
-	console.log(`Current user: ${req.user}`);
-	res.json(req.user);
+// exports.logout = (req, res) => {
+// 	req.logout();
+// 	// req.flash('success', 'You are now logged out!');
+// 	console.log(`Current user: ${req.user}`);
+// 	res.json(req.user);
+// };
+
+
+exports.get = async (req, res) => {
+
+	// Query the database for a list of all stores
+	const page = req.params.page || 1
+	const limit = 4;
+	const skip = (page * limit) - limit
+
+	const usersPromise = User
+		.find()
+		.skip(skip)
+		.limit(limit)
+		.sort({ created: 'desc' });
+
+	const countPromise = User.count();
+
+	const [users, count] = await Promise.all([usersPromise, countPromise]);
+	const pages = Math.ceil(count / limit);
+
+	// Do we put something here?
+	// if (!stores.length && skip) {
+	// 	req.flash('info', `Hey you asked for page ${page}, but that doesn't exist. So I put you on page ${pages}.`);
+	// 	res.redirect(`/stores/page/${pages}`);
+	// 	return;
+	// }
+
+	apiResponse.success(res, users);
+	// res.render('stores', { title: 'Stores', stores, page, count, pages })
 };
 
 exports.account = (req, res) => {

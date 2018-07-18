@@ -7,6 +7,10 @@ const mongodbErrorHandler = require('mongoose-mongodb-errors');
 const passportLocalMongoose = require('passport-local-mongoose');
 
 const userSchema = new Schema({
+	created: {
+		type: Date,
+		default: Date.now
+	},
 	email: {
 		type: String,
 		unique: true,

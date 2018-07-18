@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-//var ResponseError = require('../handlers/responseError');
 const apiResponse = require('../handlers/apiResponse');
 // const storeController = require('../controllers/storeController');
 const userController = require('../controllers/userController');
-// const authController = require('../controllers/authController');
+const authController = require('../controllers/authController');
 // const reviewController = require('../controllers/reviewController');
 
 const { catchErrors } = require('../handlers/errorHandlers')
@@ -14,46 +13,46 @@ const { catchErrors } = require('../handlers/errorHandlers')
 */
 
 
-router.get('/throw', (req, res) => {
-	// const err = new ResponseError(405, 'Response Error');
+// router.get('/throw', (req, res) => {
+// 	// const err = new ResponseError(405, 'Response Error');
 
-	// // const err = Error('Thrown Error', 403);
+// 	// // const err = Error('Thrown Error', 403);
 	
-	// // err.status = 402;
+// 	// // err.status = 402;
 
-	// console.log(err);
-	// throw new ResponseError(405, 'Response Error');; 
-	apiResponse.error(res, 309, 'Hey, an error!');
-});
+// 	// console.log(err);
+// 	// throw new ResponseError(405, 'Response Error');; 
+// 	apiResponse.error(res, 309, 'Hey, an error!');
+// });
 
-router.get('/error', (err, req, res, next) => {
-	err = Error('Returned error');
-	err.status = 401;
+// router.get('/error', (err, req, res, next) => {
+// 	err = Error('Returned error');
+// 	err.status = 401;
 
-	next();
-});
+// 	next();
+// });
 
 router.get('/', (req, res) => {
 	console.log(`Current user is: ${req.user}`)
 
 	if (req.user) {
 		apiResponse.success(res, req.user);
-		// res.json(req.user);
 	} else {
 		apiResponse.error(res, 409, 'Not logged in!');
-		// res.send('Not logged in')
 	}
 });
 
 router.post('/api/v1/auth/register', 
-	userController.validateRegister,
-	catchErrors(userController.register),
-	catchErrors(userController.login)
+	authController.validateRegister,
+	catchErrors(authController.register),
+	catchErrors(authController.login)
 );
 
-router.post('/api/v1/auth/login', userController.login);
-router.post('/api/v1/auth/logout', userController.logout);
+router.post('/api/v1/auth/login', authController.login);
+router.post('/api/v1/auth/logout', authController.logout);
 
+
+router.get('/api/v1/users', userController.get);
 
 	// userController.validateRegister,
 	// catchErrors(userController.register),

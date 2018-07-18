@@ -1,3 +1,5 @@
+const apiResponse = require('./apiResponse');
+
 /*
   Catch Errors Handler
 
@@ -18,7 +20,7 @@ exports.catchErrors = (fn) => {
   If we hit a route that is not found, we mark it as 404 and pass it along to the next error handler to display
 */
 exports.notFound = (req, res, next) => {
-  const err = new Error('Not Found');
+  const err = new Error('Resource Not Found');
   err.status = 404;
   next(err);
 };
@@ -45,20 +47,24 @@ exports.flashValidationErrors = (err, req, res, next) => {
   In development we show good error messages so if we hit a syntax error or any other previously un-handled error, we can show good info on what happened
 */
 exports.developmentErrors = (err, req, res, next) => {
-  err.stack = err.stack || '';
-  const errorDetails = {
-    message: err.message,
-    status: err.status,
-    stackHighlighted: err.stack.replace(/[a-z_-\d]+.js:\d+:\d+/gi, '<mark>$&</mark>')
-  };
-  res.status(err.status || 500);
-  res.format({
-    // Based on the `Accept` http header
-    'text/html': () => {
-      res.render('error', errorDetails);
-    }, // Form Submit, Reload the page
-    'application/json': () => res.json(errorDetails) // Ajax call, send JSON back
-  });
+  // err.stack = err.stack || '';
+  // const errorDetails = {
+  //   message: err.message,
+  //   // status: err.status,
+  //   stackHighlighted: err.stack //.replace(/[a-z_-\d]+.js:\d+:\d+/gi, '<mark>$&</mark>')
+  // };
+  
+  // const status = err.status || 500;
+
+  // res.status(status);
+  apiResponse.error(res, err.status, err.message, err.stack);
+  // res.format({
+  //   // Based on the `Accept` http header
+  //   'text/html': () => {
+  //     res.render('error', errorDetails);
+  //   }, // Form Submit, Reload the page
+  //   'application/json': () => res.json(errorDetails) // Ajax call, send JSON back
+  // });
 };
 
 
@@ -68,9 +74,16 @@ exports.developmentErrors = (err, req, res, next) => {
   No stacktraces are leaked to user
 */
 exports.productionErrors = (err, req, res, next) => {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
+  apiResponse.error(res, err.status, err.message);
+  //   const errorDetails = {
+  //   message: err.message,
+  // };
+  
+  // res.json(apiPkg(res, err.status, null, errorDetails));
+
+  // res.status(err.status || 500);
+  // res.render('error', {
+  //   message: err.message,
+  //   error: {}
+  // });
 };
